@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 모둠 과학 마스코트 스튜디오</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Gaegu & Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                        hand: ['Gaegu', 'cursive'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .font-hand { font-family: 'Gaegu', cursive; }
+        .step-active { @apply bg-amber-500 text-white font-extrabold shadow-md border-amber-600; }
+        .step-inactive { @apply bg-slate-100 text-slate-500 font-medium hover:bg-amber-50; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .card-container { box-shadow: none !important; border: 3px solid #000 !important; width: 100% !important; max-width: 100% !important; }
+        }
+    </style>
+</head>
+<body class="bg-amber-50/60 min-h-screen text-slate-800 font-sans pb-12">
+
+    <header class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-white text-amber-600 flex items-center justify-center font-bold text-2xl shadow">
+                    🎨
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-tight leading-none font-hand">우리 모둠 과학 마스코트 스튜디오</h1>
+                    <p class="text-xs text-amber-100 mt-1">모둠 이름과 선택 이유를 입력하고 단 하나뿐인 캐릭터를 완성해보세요!</p>
+                </div>
+            </div>
+            
+            <!-- Process Step Controls -->
+            <div class="flex space-x-1.5 bg-amber-700/30 p-1 rounded-xl text-xs no-print">
+                <button onclick="switchStep(1)" id="btn-step-1" class="px-3 py-1.5 rounded-lg border transition-all flex items-center space-x-1 step-active">
+                    <span>1. 정보 입력</span>
+                </button>
+                <button onclick="switchStep(2)" id="btn-step-2" class="px-3 py-1.5 rounded-lg border transition-all flex items-center space-x-1 step-inactive">
+                    <span>2. 캐릭터 제작</span>
+                </button>
+                <button onclick="switchStep(3)" id="btn-step-3" class="px-3 py-1.5 rounded-lg border transition-all flex items-center space-x-1 step-inactive">
+                    <span>3. 최종 카드</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <main class="max-w-5xl mx-auto px-4 mt-6">
+
+        <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 border border-slate-700 pointer-events-none">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-amber-400 text-lg"></i>
+            <span id="toast-msg" class="text-sm font-medium">메시지가 등록되었습니다.</span>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- STEP 1: GROUP INFO INPUT (모둠 이름 & 이유) -->
+        <!-- ========================================== -->
+        <section id="view-step1" class="space-y-6">
+            
+            <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
+                <div class="border-b pb-4 mb-6">
+                    <span class="inline-block bg-amber-100 text-amber-800 text-xs font-black px-3 py-1 rounded-full mb-2">STEP 1</span>
+                    <h2 class="text-2xl font-black text-slate-800 font-hand">모둠 이름과 지은 이유 작성하기</h2>
+                    <p class="text-xs text-slate-500 mt-1">완성된 모둠 이름을 적어주세요. 이 내용을 바탕으로 마스코트 캐릭터가 생동감 있게 표현됩니다.</p>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Final Team Name Input -->
+                    <div>
+                        <label class="block font-extrabold text-slate-800 text-sm mb-2">
+                            🏷️ 최종 모둠 이름 <span class="text-amber-600 font-normal text-xs">(최대 10자)</span>
+                        </label>
+                        <input type="text" id="input-team-name" maxlength="10" placeholder="예: 지진짜 멋진 팀 / 단단해암 / 반짝광물단 / 마그마파워" 
+                            class="w-full text-lg font-bold p-3.5 rounded-2xl border-2 border-amber-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 focus:outline-none bg-amber-50/20 text-slate-800">
+                    </div>
+
+                    <!-- Quick Ideas Chips -->
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 block mb-2">💡 빠르게 이름 추천 조합하기 (클릭시 입력)</span>
+                        <div class="flex flex-wrap gap-2 text-xs">
+                            <button type="button" onclick="setQuickName('지진짜 멋진 팀', '지진처럼 강력한 에너지로 과학 문제를 해결하겠다는 뜻')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-200 font-semibold transition">🌋 지진짜 멋진 팀</button>
+                            <button type="button" onclick="setQuickName('단단해암', '화강암처럼 단단한 단합력으로 모둠 활동을 함께 해나간다는 의미')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-200 font-semibold transition">🪨 단단해암</button>
+                            <button type="button" onclick="setQuickName('반짝반짝 광물단', '서로 다른 개성을 가진 광물처럼 각자의 장점을 발휘한다는 뜻')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-200 font-semibold transition">💎 반짝반짝 광물단</button>
+                            <button type="button" onclick="setQuickName('마그마 파워', '뜨거운 마그마처럼 열정적이고 창의적인 아이디어를 뿜어낸다는 의미')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl border border-amber-200 font-semibold transition">🔥 마그마 파워</button>
+                        </div>
+                    </div>
+
+                    <!-- Reason & Meaning Input -->
+                    <div>
+                        <label class="block font-extrabold text-slate-800 text-sm mb-2">
+                            💡 모둠 이름을 지은 이유 & 과학적 의미
+                        </label>
+                        <textarea id="input-team-reason" rows="4" placeholder="예) '지진'과 '진짜'를 결합하여 지진처럼 강력한 탐구 에너지와 넘치는 열정으로 지권의 변화 단원을 완벽하게 정복하겠다는 모둠의 의지를 담았습니다." 
+                            class="w-full text-xs sm:text-sm p-3.5 rounded-2xl border border-slate-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 focus:outline-none resize-none leading-relaxed"></textarea>
+                    </div>
+
+                    <!-- Key Theme / Element Category -->
+                    <div>
+                        <label class="block font-extrabold text-slate-800 text-sm mb-2">
+                            🔬 마스코트 핵심 주제 모티브
+                        </label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                            <label class="border-2 border-slate-200 hover:border-amber-400 p-3 rounded-2xl cursor-pointer flex items-center space-x-2 bg-slate-50">
+                                <input type="radio" name="theme-motive" value="volcano" checked class="text-amber-500 focus:ring-amber-400">
+                                <span class="font-bold">🌋 화산 / 마그마</span>
+                            </label>
+                            <label class="border-2 border-slate-200 hover:border-amber-400 p-3 rounded-2xl cursor-pointer flex items-center space-x-2 bg-slate-50">
+                                <input type="radio" name="theme-motive" value="rock" class="text-amber-500 focus:ring-amber-400">
+                                <span class="font-bold">🪨 암석 / 화강암</span>
+                            </label>
+                            <label class="border-2 border-slate-200 hover:border-amber-400 p-3 rounded-2xl cursor-pointer flex items-center space-x-2 bg-slate-50">
+                                <input type="radio" name="theme-motive" value="gem" class="text-amber-500 focus:ring-amber-400">
+                                <span class="font-bold">💎 광물 / 보석</span>
+                            </label>
+                            <label class="border-2 border-slate-200 hover:border-amber-400 p-3 rounded-2xl cursor-pointer flex items-center space-x-2 bg-slate-50">
+                                <input type="radio" name="theme-motive" value="earth" class="text-amber-500 focus:ring-amber-400">
+                                <span class="font-bold">🌍 지구 / 지각</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Next Step Button -->
+                    <div class="pt-4 border-t">
+                        <button type="button" onclick="goToStep2()" class="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold rounded-2xl shadow-lg transition transform active:scale-[0.99] flex items-center justify-center space-x-2 text-base">
+                            <span>캐릭터 만들러 가기</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- STEP 2: CHARACTER STUDIO (캐릭터 제작) -->
+        <!-- ========================================== -->
+        <section id="view-step2" class="hidden space-y-6">
+            
+            <div class="bg-white p-5 sm:p-7 rounded-3xl shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 pb-4 border-b mb-6">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-amber-500 text-white font-bold px-2.5 py-0.5 rounded-full text-xs">STEP 2</span>
+                            <h2 class="text-2xl font-black text-slate-800 font-hand">우리 모둠 마스코트 제작 스튜디오</h2>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">벡터 커스텀 편집기로 스타일을 직접 조합하거나, AI 화가에게 생성을 요청할 수 있습니다.</p>
+                    </div>
+                    <div class="bg-amber-100 text-amber-900 font-bold px-3 py-1.5 rounded-xl text-xs border border-amber-300">
+                        모둠: <span id="display-team-name" class="font-black text-sm text-amber-950">지진짜 멋진 팀</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    
+                    <!-- Left: Interactive Vector Customization Editor (7 Cols) -->
+                    <div class="lg:col-span-7 flex flex-col items-center">
+                        <div class="w-full max-w-md bg-gradient-to-b from-amber-50 to-orange-50/40 p-6 rounded-3xl border-2 border-amber-200 shadow-inner flex flex-col items-center justify-center relative">
+                            
+                            <!-- Mascot Canvas Viewport -->
+                            <div id="mascot-viewport" class="w-60 h-60 bg-white rounded-2xl shadow-md border border-amber-200 flex items-center justify-center relative overflow-hidden">
+                                <div id="mascot-bg-effect" class="absolute inset-0 bg-amber-50/80"></div>
+
+                                <!-- Dynamic SVG Graphic -->
+                                <svg id="mascot-svg" width="220" height="220" viewBox="0 0 200 200" class="relative z-10">
+                                    <defs>
+                                        <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+                                            <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.15"/>
+                                        </filter>
+                                    </defs>
+
+                                    <!-- Aura Layer -->
+                                    <g id="svg-aura"></g>
+
+                                    <!-- Base Body Layer -->
+                                    <g id="svg-body" filter="url(#shadow)"></g>
+
+                                    <!-- Facial Features Layer -->
+                                    <g id="svg-face"></g>
+
+                                    <!-- Accessories / Headwear Layer -->
+                                    <g id="svg-acc"></g>
+
+                                    <!-- Name Tag Badge Layer -->
+                                    <rect x="30" y="165" width="140" height="24" rx="12" fill="#1e293b" opacity="0.9" />
+                                    <text id="svg-badge-text" x="100" y="181" font-family="'Noto Sans KR', sans-serif" font-weight="900" font-size="10" fill="#ffffff" text-anchor="middle">모둠 이름</text>
+                                </svg>
+                            </div>
+
+                            <p class="text-[11px] text-slate-400 mt-2 font-medium">아래 컨트롤러로 모양, 표정, 색상, 악세사리를 조절하세요.</p>
+                        </div>
+
+                        <!-- Customizer Control Panels -->
+                        <div class="w-full mt-4 space-y-3">
+                            <!-- Category Buttons -->
+                            <div class="grid grid-cols-4 gap-1 text-xs font-bold bg-slate-100 p-1 rounded-2xl">
+                                <button onclick="setTab('shape')" id="tab-shape" class="py-2 rounded-xl bg-white shadow-sm text-amber-600">모양</button>
+                                <button onclick="setTab('face')" id="tab-face" class="py-2 rounded-xl text-slate-600">표정</button>
+                                <button onclick="setTab('acc')" id="tab-acc" class="py-2 rounded-xl text-slate-600">악세사리</button>
+                                <button onclick="setTab('color')" id="tab-color" class="py-2 rounded-xl text-slate-600">색상</button>
+                            </div>
+
+                            <!-- Panel 1: Shape -->
+                            <div id="panel-shape" class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                                <span class="text-xs font-bold text-slate-600 block mb-2">기본 마스코트 형태</span>
+                                <div class="grid grid-cols-3 gap-2 text-xs font-semibold">
+                                    <button onclick="changeShape('volcano')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400 flex flex-col items-center"><span>🌋</span> 화산</button>
+                                    <button onclick="changeShape('rock')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400 flex flex-col items-center"><span>🪨</span> 암석/화강암</button>
+                                    <button onclick="changeShape('gem')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400 flex flex-col items-center"><span>💎</span> 광물/보석</button>
+                                    <button onclick="changeShape('stratum')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400 flex flex-col items-center"><span>🥞</span> 지층</button>
+                                    <button onclick="changeShape('earth')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400 flex flex-col items-center"><span>🌍</span> 지구</button>
+                                    <button onclick="changeShape('flame')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400 flex flex-col items-center"><span>🔥</span> 불꽃</button>
+                                </div>
+                            </div>
+
+                            <!-- Panel 2: Face -->
+                            <div id="panel-face" class="hidden bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                                <span class="text-xs font-bold text-slate-600 block mb-2">표정 선택</span>
+                                <div class="grid grid-cols-4 gap-2 text-xs font-semibold">
+                                    <button onclick="changeFace('happy')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400">😊 방긋</button>
+                                    <button onclick="changeFace('sparkle')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400">🤩 반짝</button>
+                                    <button onclick="changeFace('cool')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400">🕶️ 선글라스</button>
+                                    <button onclick="changeFace('determined')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400">🔥 열정</button>
+                                </div>
+                            </div>
+
+                            <!-- Panel 3: Accessories -->
+                            <div id="panel-acc" class="hidden bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                                <span class="text-xs font-bold text-slate-600 block mb-2">장식 & 효과</span>
+                                <div class="grid grid-cols-4 gap-2 text-xs font-semibold">
+                                    <button onclick="changeAcc('none')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400">없음</button>
+                                    <button onclick="changeAcc('crown')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400">👑 왕관</button>
+                                    <button onclick="changeAcc('glasses')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400">👓 연구 안경</button>
+                                    <button onclick="changeAcc('sparkles')" class="p-2.5 bg-white rounded-xl border hover:border-amber-400">✨ 후광 이펙트</button>
+                                </div>
+                            </div>
+
+                            <!-- Panel 4: Color -->
+                            <div id="panel-color" class="hidden bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                                <span class="text-xs font-bold text-slate-600 block mb-2">메인 컬러</span>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="changeMainColor('#ef4444')" class="w-8 h-8 rounded-full bg-red-500 border-2 border-white shadow"></button>
+                                    <button onclick="changeMainColor('#f97316')" class="w-8 h-8 rounded-full bg-orange-500 border-2 border-white shadow"></button>
+                                    <button onclick="changeMainColor('#f59e0b')" class="w-8 h-8 rounded-full bg-amber-500 border-2 border-white shadow"></button>
+                                    <button onclick="changeMainColor('#10b981')" class="w-8 h-8 rounded-full bg-emerald-500 border-2 border-white shadow"></button>
+                                    <button onclick="changeMainColor('#06b6d4')" class="w-8 h-8 rounded-full bg-cyan-500 border-2 border-white shadow"></button>
+                                    <button onclick="changeMainColor('#6366f1')" class="w-8 h-8 rounded-full bg-indigo-500 border-2 border-white shadow"></button>
+                                    <button onclick="changeMainColor('#64748b')" class="w-8 h-8 rounded-full bg-slate-500 border-2 border-white shadow"></button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Right: Gemini AI Mascot Generator (5 Cols) -->
+                    <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 to-amber-950 text-white p-6 rounded-3xl shadow-xl flex flex-col justify-between border border-amber-500/30">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-2">
+                                    <span class="p-1.5 bg-amber-500/20 text-amber-400 rounded-lg text-lg">✨</span>
+                                    <h3 class="font-bold text-lg text-amber-300 font-hand">Gemini AI 마스코트 생성이</h3>
+                                </div>
+                                <span class="text-[10px] bg-amber-500/30 text-amber-300 px-2 py-0.5 rounded border border-amber-400/30 font-semibold">Flash Model</span>
+                            </div>
+
+                            <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+                                작성하신 모둠 이름과 이유를 바탕으로 AI가 어울리는 독창적인 마스코트 일러스트를 그려줍니다.
+                            </p>
+
+                            <!-- AI Style Options -->
+                            <div class="mb-4 space-y-1.5">
+                                <label class="text-xs font-bold text-amber-200">화풍 (Art Style) 선택:</label>
+                                <select id="ai-style-select" onchange="updatePromptPreview()" class="w-full bg-slate-800 text-xs text-slate-100 p-2.5 rounded-xl border border-slate-700 focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                                    <option value="cute 3D Pixar render style, smooth clay texture, cheerful expression">🎨 귀여운 3D 클레이/픽사 스타일</option>
+                                    <option value="cute Kawaii anime mascot logo illustration, clean vector style">✨ 귀여운 카와이 캐릭터 로고</option>
+                                    <option value="chibi pixel art mascot character icon">👾 레트로 픽셀 아트 마스코트</option>
+                                    <option value="vibrant warm watercolor science mascot illustration">🖌️ 따뜻한 수채화 일러스트</option>
+                                </select>
+                            </div>
+
+                            <!-- Generated Prompt Preview Box -->
+                            <div class="mb-4">
+                                <label class="text-[11px] font-bold text-amber-200/80 block mb-1">자동 프롬프트:</label>
+                                <div id="prompt-preview-box" class="bg-slate-950/80 p-2.5 rounded-xl text-[10px] font-mono text-amber-300/90 border border-slate-800 leading-tight max-h-16 overflow-y-auto">
+                                    Prompt generating...
+                                </div>
+                            </div>
+
+                            <!-- Generated AI Image Container -->
+                            <div class="mb-4 min-h-[170px] bg-slate-950 rounded-2xl border border-slate-800 flex items-center justify-center relative overflow-hidden">
+                                <!-- Loading State -->
+                                <div id="ai-loading" class="hidden absolute inset-0 bg-slate-950/90 z-20 flex flex-col items-center justify-center p-4 text-center">
+                                    <div class="w-9 h-9 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                                    <p class="text-xs font-bold text-amber-300 animate-pulse">AI 마스코트 그리는 중...</p>
+                                    <p class="text-[10px] text-slate-400 mt-1">이름과 의미를 조합하고 있습니다.</p>
+                                </div>
+
+                                <!-- Result Image -->
+                                <img id="ai-image-result" class="hidden w-full h-44 object-contain rounded-xl z-10" alt="Generated Mascot">
+
+                                <!-- Placeholder -->
+                                <div id="ai-placeholder" class="text-center p-4">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-3xl text-amber-500/40 mb-2"></i>
+                                    <p class="text-xs text-slate-400 font-medium">버튼을 누르면 AI가 그려줍니다.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="space-y-2">
+                            <button type="button" onclick="generateAIMascot()" class="w-full py-3 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm rounded-xl shadow-lg transition transform active:scale-95 flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-sparkles"></i>
+                                <span>✨ AI 마스코트 그림 생성</span>
+                            </button>
+
+                            <button type="button" onclick="goToStep3()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition flex items-center justify-center space-x-1">
+                                <span>완성된 캐릭터로 카드 보기</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- STEP 3: FINAL CHARACTER CARD (최종 카드) -->
+        <!-- ========================================== -->
+        <section id="view-step3" class="hidden space-y-6">
+            
+            <div class="no-print flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800 font-hand">🎉 모둠 마스코트 캐릭터 카드 완성!</h2>
+                    <p class="text-xs text-slate-500">인쇄하거나 제출용 카드 자료로 활용할 수 있습니다.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="window.print()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow transition flex items-center space-x-1">
+                        <i class="fa-solid fa-print"></i>
+                        <span>카드 인쇄 / PDF 저장</span>
+                    </button>
+                    <button onclick="switchStep(2)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+                        <span>캐릭터 수정</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Mascot Presentation Card -->
+            <div id="final-card" class="card-container max-w-xl mx-auto bg-white border-4 border-amber-400 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+                
+                <!-- Background Decorations -->
+                <div class="absolute -right-8 -top-8 text-amber-100 text-9xl font-black pointer-events-none opacity-50 select-none">🌋</div>
+                <div class="absolute -left-8 -bottom-8 text-orange-100 text-9xl font-black pointer-events-none opacity-50 select-none">💎</div>
+
+                <!-- Card Header Banner -->
+                <div class="relative z-10 text-center pb-5 border-b-2 border-dashed border-amber-200">
+                    <span class="inline-block px-3 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full mb-1.5">
+                        과학 탐구 모둠 마스코트
+                    </span>
+                    <h1 id="card-team-name" class="text-3xl sm:text-4xl font-black text-amber-950 font-hand tracking-wide">
+                        지진짜 멋진 팀
+                    </h1>
+                </div>
+
+                <!-- Center Mascot Graphic -->
+                <div class="relative z-10 my-6 flex flex-col items-center justify-center">
+                    <div class="w-56 h-56 bg-gradient-to-b from-amber-50 to-orange-100 rounded-3xl border-2 border-amber-300 shadow-md flex items-center justify-center p-3 relative overflow-hidden">
+                        <div id="card-mascot-box" class="w-full h-full flex items-center justify-center">
+                            <!-- Injected SVG or AI Image -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reason & Meaning Box -->
+                <div class="relative z-10 space-y-3">
+                    <div class="bg-amber-50/90 p-4 rounded-2xl border border-amber-200">
+                        <span class="text-xs font-black text-amber-900 block mb-1">💡 모둠 이름과 지은 이유</span>
+                        <p id="card-team-reason" class="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">
+                            '지진'과 '진짜'를 결합하여 지진처럼 강력한 탐구 에너지와 넘치는 열정으로 지권의 변화 단원을 완벽하게 정복하겠다는 모둠의 의지를 담았습니다.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Footer Tag -->
+                <div class="relative z-10 mt-6 pt-3 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100">
+                    <span>모둠 과학 마스코트 제작 완료 ✨</span>
+                    <span class="font-bold text-amber-600 font-hand text-sm">중학교 과학 탐구 활동</span>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        // App Core State
+        const state = {
+            teamName: "지진짜 멋진 팀",
+            reason: "'지진'과 '진짜'를 결합하여 지진처럼 강력한 탐구 에너지와 넘치는 열정으로 지권의 변화 단원을 완벽하게 정복하겠다는 모둠의 의지를 담았습니다.",
+            motive: "volcano",
+            mascot: {
+                shape: 'volcano',
+                face: 'happy',
+                acc: 'none',
+                color: '#ef4444',
+                aiImageBase64: null
+            }
+        };
+
+        // Window Onload Initialization
+        window.onload = function() {
+            // Set initial input values
+            document.getElementById('input-team-name').value = state.teamName;
+            document.getElementById('input-team-reason').value = state.reason;
+
+            // Render vector mascot
+            renderVectorMascot();
+            updatePromptPreview();
+
+            // Event Listeners for Live Updates
+            document.getElementById('input-team-name').addEventListener('input', (e) => {
+                state.teamName = e.target.value.trim() || "모둠 이름";
+                document.getElementById('svg-badge-text').textContent = state.teamName;
+                document.getElementById('display-team-name').textContent = state.teamName;
+                updatePromptPreview();
+            });
+
+            document.getElementById('input-team-reason').addEventListener('input', (e) => {
+                state.reason = e.target.value;
+                updatePromptPreview();
+            });
+        };
+
+        // Step Switcher
+        function switchStep(stepNum) {
+            [1, 2, 3].forEach(n => {
+                const view = document.getElementById('view-step' + n);
+                const btn = document.getElementById('btn-step-' + n);
+                if (n === stepNum) {
+                    view.classList.remove('hidden');
+                    btn.classList.remove('step-inactive');
+                    btn.classList.add('step-active');
+                } else {
+                    view.classList.add('hidden');
+                    btn.classList.remove('step-active');
+                    btn.classList.add('step-inactive');
+                }
+            });
+
+            if (stepNum === 3) {
+                updateFinalCard();
+            }
+        }
+
+        // Quick Name Fill Helper
+        function setQuickName(name, reason) {
+            document.getElementById('input-team-name').value = name;
+            document.getElementById('input-team-reason').value = reason;
+            state.teamName = name;
+            state.reason = reason;
+            document.getElementById('svg-badge-text').textContent = name;
+            document.getElementById('display-team-name').textContent = name;
+            showToast(`'${name}' 정보가 입력되었습니다.`);
+            updatePromptPreview();
+        }
+
+        function goToStep2() {
+            const nameVal = document.getElementById('input-team-name').value.trim();
+            if (!nameVal) {
+                showToast("모둠 이름을 입력해주세요!", "fa-circle-exclamation");
+                return;
+            }
+            state.teamName = nameVal;
+            state.reason = document.getElementById('input-team-reason').value.trim();
+
+            document.getElementById('display-team-name').textContent = state.teamName;
+            document.getElementById('svg-badge-text').textContent = state.teamName;
+
+            updatePromptPreview();
+            switchStep(2);
+            showToast("2단계: 캐릭터 제작 스튜디오로 이동했습니다.");
+        }
+
+        function goToStep3() {
+            switchStep(3);
+            showToast("🎉 최종 마스코트 카드가 완성되었습니다!");
+        }
+
+        // Customizer Control Tabs
+        function setTab(tab) {
+            ['shape', 'face', 'acc', 'color'].forEach(t => {
+                document.getElementById('panel-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).classList.remove('bg-white', 'shadow-sm', 'text-amber-600');
+                document.getElementById('tab-' + t).classList.add('text-slate-600');
+            });
+            document.getElementById('panel-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).classList.add('bg-white', 'shadow-sm', 'text-amber-600');
+        }
+
+        function changeShape(shape) {
+            state.mascot.shape = shape;
+            renderVectorMascot();
+            updatePromptPreview();
+        }
+
+        function changeFace(face) {
+            state.mascot.face = face;
+            renderVectorMascot();
+        }
+
+        function changeAcc(acc) {
+            state.mascot.acc = acc;
+            renderVectorMascot();
+        }
+
+        function changeMainColor(color) {
+            state.mascot.color = color;
+            renderVectorMascot();
+        }
+
+        // Render Vector SVG Mascot based on State
+        function renderVectorMascot() {
+            const bodyG = document.getElementById('svg-body');
+            const faceG = document.getElementById('svg-face');
+            const accG = document.getElementById('svg-acc');
+            const auraG = document.getElementById('svg-aura');
+            const c = state.mascot.color;
+
+            bodyG.innerHTML = '';
+            faceG.innerHTML = '';
+            accG.innerHTML = '';
+            auraG.innerHTML = '';
+
+            // Body Shape Rendering
+            if (state.mascot.shape === 'volcano') {
+                bodyG.innerHTML = `
+                    <path d="M 40 160 L 70 70 L 130 70 L 160 160 Z" fill="${c}" stroke="#7f1d1d" stroke-width="4" rx="10"/>
+                    <ellipse cx="100" cy="70" rx="30" ry="10" fill="#dc2626" />
+                    <path d="M 75 72 Q 80 100 85 72 Q 95 110 105 72 Q 115 95 125 72" fill="#f97316" />
+                `;
+            } else if (state.mascot.shape === 'rock') {
+                bodyG.innerHTML = `
+                    <path d="M 50 150 Q 30 100 60 60 Q 110 40 150 70 Q 170 120 140 155 Q 90 170 50 150 Z" fill="${c}" stroke="#334155" stroke-width="4"/>
+                    <path d="M 70 80 L 90 95 L 85 110" stroke="#1e293b" stroke-width="2" fill="none" opacity="0.4"/>
+                `;
+            } else if (state.mascot.shape === 'gem') {
+                bodyG.innerHTML = `
+                    <polygon points="100,40 150,80 130,155 70,155 50,80" fill="${c}" stroke="#0284c7" stroke-width="4"/>
+                    <polygon points="100,40 120,80 100,155 80,80" fill="#ffffff" opacity="0.25"/>
+                `;
+            } else if (state.mascot.shape === 'stratum') {
+                bodyG.innerHTML = `
+                    <rect x="45" y="60" width="110" height="95" rx="16" fill="${c}" stroke="#78350f" stroke-width="4"/>
+                    <rect x="45" y="85" width="110" height="20" fill="#b45309"/>
+                    <rect x="45" y="115" width="110" height="20" fill="#78350f"/>
+                `;
+            } else if (state.mascot.shape === 'earth') {
+                bodyG.innerHTML = `
+                    <circle cx="100" cy="105" r="52" fill="#0284c7" stroke="#0369a1" stroke-width="4"/>
+                    <path d="M 70 90 Q 90 80 110 95 T 130 110 Q 110 130 90 125 Z" fill="#22c55e" opacity="0.9"/>
+                `;
+            } else if (state.mascot.shape === 'flame') {
+                bodyG.innerHTML = `
+                    <path d="M 100 40 Q 140 80 140 120 Q 140 160 100 160 Q 60 160 60 120 Q 60 80 100 40 Z" fill="${c}" stroke="#b91c1c" stroke-width="4"/>
+                    <path d="M 100 70 Q 120 100 120 125 Q 120 150 100 150 Q 80 150 80 125 Q 80 100 100 70 Z" fill="#fbbf24"/>
+                `;
+            }
+
+            // Facial Expression Rendering
+            if (state.mascot.face === 'happy') {
+                faceG.innerHTML = `
+                    <circle cx="82" cy="100" r="5" fill="#1e293b"/>
+                    <circle cx="118" cy="100" r="5" fill="#1e293b"/>
+                    <path d="M 88 115 Q 100 128 112 115" stroke="#1e293b" stroke-width="3" stroke-linecap="round" fill="none"/>
+                    <circle cx="75" cy="108" r="6" fill="#f43f5e" opacity="0.4"/>
+                    <circle cx="125" cy="108" r="6" fill="#f43f5e" opacity="0.4"/>
+                `;
+            } else if (state.mascot.face === 'sparkle') {
+                faceG.innerHTML = `
+                    <text x="73" y="105" font-size="16" text-anchor="middle">✨</text>
+                    <text x="127" y="105" font-size="16" text-anchor="middle">✨</text>
+                    <path d="M 85 115 Q 100 132 115 115 Z" fill="#1e293b"/>
+                `;
+            } else if (state.mascot.face === 'cool') {
+                faceG.innerHTML = `
+                    <polygon points="68,92 132,92 125,108 75,108" fill="#0f172a"/>
+                    <line x1="65" y1="94" x2="135" y2="94" stroke="#0f172a" stroke-width="3"/>
+                    <path d="M 90 118 Q 100 125 110 118" stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round"/>
+                `;
+            } else if (state.mascot.face === 'determined') {
+                faceG.innerHTML = `
+                    <line x1="72" y1="92" x2="90" y2="98" stroke="#1e293b" stroke-width="3"/>
+                    <line x1="128" y1="92" x2="110" y2="98" stroke="#1e293b" stroke-width="3"/>
+                    <circle cx="82" cy="102" r="4" fill="#1e293b"/>
+                    <circle cx="118" cy="102" r="4" fill="#1e293b"/>
+                    <line x1="88" y1="120" x2="112" y2="120" stroke="#1e293b" stroke-width="3" stroke-linecap="round"/>
+                `;
+            }
+
+            // Accessories Rendering
+            if (state.mascot.acc === 'crown') {
+                accG.innerHTML = `
+                    <polygon points="75,45 85,25 100,40 115,25 125,45" fill="#f59e0b" stroke="#b45309" stroke-width="2"/>
+                    <circle cx="100" cy="33" r="3" fill="#ef4444"/>
+                `;
+            } else if (state.mascot.acc === 'glasses') {
+                accG.innerHTML = `
+                    <circle cx="82" cy="100" r="10" stroke="#0284c7" stroke-width="2" fill="none"/>
+                    <circle cx="118" cy="100" r="10" stroke="#0284c7" stroke-width="2" fill="none"/>
+                    <line x1="92" y1="100" x2="108" y2="100" stroke="#0284c7" stroke-width="2"/>
+                `;
+            } else if (state.mascot.acc === 'sparkles') {
+                auraG.innerHTML = `
+                    <circle cx="100" cy="100" r="75" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6,6" opacity="0.6"/>
+                    <text x="30" y="50" font-size="16">✨</text>
+                    <text x="160" y="50" font-size="16">⭐</text>
+                `;
+            }
+        }
+
+        // Construct Prompt for AI Generation
+        function updatePromptPreview() {
+            const style = document.getElementById('ai-style-select').value;
+            
+            // Map shape motive to clear English keywords for optimal AI image generation
+            const motiveMap = {
+                'volcano': 'Volcano and Magma character',
+                'rock': 'Rock Granite character',
+                'gem': 'Crystal Gem Mineral character',
+                'stratum': 'Geological Stratum Layer character',
+                'earth': 'Planet Earth Crust character',
+                'flame': 'Energetic Flame Fire character'
+            };
+            const motiveStr = motiveMap[state.mascot.shape] || 'Science element character';
+
+            // Clean English prompt optimized for Gemini Image generation models
+            const promptText = `A cute friendly science mascot character logo, theme: ${motiveStr}, team concept: "${state.teamName}", style: ${style}, vibrant colors, clean isolated solid background, centered, high quality 3d render.`;
+            
+            document.getElementById('prompt-preview-box').textContent = promptText;
+            return promptText;
+        }
+
+        // Call Gemini Image Generation API with Multi-model Fallback & Backoff
+        async function generateAIMascot() {
+            const promptText = updatePromptPreview();
+            const loadingEl = document.getElementById('ai-loading');
+            const resultImg = document.getElementById('ai-image-result');
+            const placeholderEl = document.getElementById('ai-placeholder');
+
+            loadingEl.classList.remove('hidden');
+
+            const apiKey = ""; // Canvas runtime injected key
+            const models = [
+                "gemini-3.1-flash-lite-image",
+                "gemini-3.1-flash-image"
+            ];
+
+            let success = false;
+            let lastErrorMsg = "";
+
+            for (const modelName of models) {
+                if (success) break;
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+                const payload = {
+                    contents: [
+                        {
+                            parts: [{ text: promptText }]
+                        }
+                    ],
+                    generationConfig: {
+                        responseModalities: ["TEXT", "IMAGE"]
+                    }
+                };
+
+                // Retry loop with exponential backoff for each model
+                for (let attempt = 1; attempt <= 2; attempt++) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            const errJson = await response.json().catch(() => ({}));
+                            console.warn(`[AI Mascot] ${modelName} attempt ${attempt} HTTP error:`, response.status, errJson);
+                            lastErrorMsg = errJson?.error?.message || `HTTP ${response.status}`;
+                            await new Promise(r => setTimeout(r, attempt * 1000));
+                            continue;
+                        }
+
+                        const result = await response.json();
+                        const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.data);
+
+                        if (part && part.inlineData) {
+                            const base64Data = part.inlineData.data;
+                            const mimeType = part.inlineData.mimeType || "image/png";
+                            const imageUrl = `data:${mimeType};base64,${base64Data}`;
+
+                            state.mascot.aiImageBase64 = imageUrl;
+                            resultImg.src = imageUrl;
+                            resultImg.classList.remove('hidden');
+                            placeholderEl.classList.add('hidden');
+                            
+                            showToast("✨ AI 마스코트 생성이 완료되었습니다!");
+                            success = true;
+                            break;
+                        } else {
+                            console.warn(`[AI Mascot] ${modelName} attempt ${attempt} missing image data in response:`, result);
+                            lastErrorMsg = "이미지 데이터가 생성 응답에 포함되지 않았습니다.";
+                        }
+                    } catch (err) {
+                        console.warn(`[AI Mascot] ${modelName} attempt ${attempt} fetch error:`, err);
+                        lastErrorMsg = err.message || "네트워크 통신 오류";
+                        await new Promise(r => setTimeout(r, attempt * 1000));
+                    }
+                }
+            }
+
+            if (!success) {
+                console.error("[AI Mascot] Generation failed:", lastErrorMsg);
+                showToast(`AI 이미지 생성 실패: ${lastErrorMsg || "다시 시도해주세요."}`, "fa-triangle-exclamation");
+            }
+
+            loadingEl.classList.add('hidden');
+        }
+
+        // Render Final Printable Card
+        function updateFinalCard() {
+            document.getElementById('card-team-name').textContent = state.teamName || "모둠 이름";
+            document.getElementById('card-team-reason').textContent = state.reason || "지은 이유가 작성되지 않았습니다.";
+
+            const mascotBox = document.getElementById('card-mascot-box');
+            mascotBox.innerHTML = '';
+
+            if (state.mascot.aiImageBase64) {
+                const img = document.createElement('img');
+                img.src = state.mascot.aiImageBase64;
+                img.className = 'w-full h-full object-contain rounded-2xl shadow';
+                mascotBox.appendChild(img);
+            } else {
+                const svgOriginal = document.getElementById('mascot-svg');
+                const svgClone = svgOriginal.cloneNode(true);
+                svgClone.setAttribute('width', '190');
+                svgClone.setAttribute('height', '190');
+                mascotBox.appendChild(svgClone);
+            }
+        }
+
+        // Notification Toast
+        function showToast(msg, icon = "fa-circle-check") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.textContent = msg;
+            toastIcon.className = `fa-solid ${icon} text-amber-400 text-lg`;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
